@@ -89,31 +89,46 @@ function drawMech(ctx: CanvasRenderingContext2D, variant: Variant, pose: AtlasKe
 
   const action = pose.split(":")[1] as PlayerAction
 
+  // Shield arm stays on the left side; sword arm stays on the right side.
+  px(ctx, 4, 11, 5, 7, "rgba(36,247,255,0.12)")
+  outline(ctx, 4, 11, 5, 7, action === "defend" ? col.hi : col.main)
+  px(ctx, 5, 12, 3, 5, "rgba(255,255,255,0.05)")
+
+  px(ctx, 17, 13, 2, 3, col.base)
+  outline(ctx, 17, 13, 2, 3, col.line)
+
   if (action === "attack") {
-    px(ctx, 17, 13, 5, 2, col.main)
-    px(ctx, 20, 12, 2, 4, col.hi)
-    px(ctx, 6, 13, 2, 4, col.base)
+    px(ctx, 19, 11, 1, 3, col.main)
+    px(ctx, 20, 9, 1, 7, col.hi)
+    px(ctx, 21, 8, 1, 8, PALETTE.white)
+    px(ctx, 22, 8, 1, 6, col.hi)
+    px(ctx, 4, 12, 4, 6, "rgba(36,247,255,0.08)")
   } else if (action === "defend") {
-    px(ctx, 18, 10, 4, 8, "rgba(36,247,255,0.18)")
-    outline(ctx, 18, 10, 4, 8, col.main)
-    px(ctx, 6, 13, 3, 3, col.base)
+    px(ctx, 3, 10, 7, 9, "rgba(36,247,255,0.2)")
+    outline(ctx, 3, 10, 7, 9, col.hi)
+    px(ctx, 18, 13, 2, 2, col.base)
   } else if (action === "dash") {
     px(ctx, 4, 14, 3, 1, col.main)
     px(ctx, 2, 15, 4, 1, "rgba(255,75,216,0.6)")
-    px(ctx, 17, 13, 4, 2, col.base)
+    px(ctx, 20, 12, 1, 6, PALETTE.white)
+    px(ctx, 21, 13, 1, 4, col.hi)
   } else if (action === "hit") {
     px(ctx, 8, 5, 8, 1, col.hi)
     px(ctx, 6, 12, 2, 2, col.hi)
+  } else if (action === "stunned") {
+    px(ctx, 20, 12, 1, 6, PALETTE.white)
+    px(ctx, 21, 13, 1, 4, col.hi)
+    px(ctx, 3, 11, 5, 7, "rgba(36,247,255,0.1)")
+    outline(ctx, 3, 11, 5, 7, col.main)
+    px(ctx, 9, 5, 6, 1, col.hi)
   } else if (action === "ko") {
     px(ctx, 7, 12, 10, 9, "rgba(0,0,0,0.55)")
     px(ctx, 9, 6, 6, 6, "rgba(0,0,0,0.55)")
     px(ctx, 10, 8, 4, 1, "rgba(255,255,255,0.2)")
     px(ctx, 10, 10, 4, 1, "rgba(255,255,255,0.2)")
   } else {
-    px(ctx, 17, 13, 3, 3, col.base)
-    px(ctx, 5, 13, 3, 3, col.base)
-    outline(ctx, 17, 13, 3, 3, col.line)
-    outline(ctx, 5, 13, 3, 3, col.line)
+    px(ctx, 20, 12, 1, 6, PALETTE.white)
+    px(ctx, 21, 13, 1, 4, col.hi)
   }
 
   px(ctx, 7, 12, 10, 1, col.main)
@@ -164,4 +179,3 @@ export function createSpriteAtlas(): SpriteAtlas {
   }
   return atlas
 }
-

@@ -16,9 +16,9 @@ export type Facing = "up" | "down" | "left" | "right"
 
 export type Phase = "ready" | "fight" | "ko"
 
-export type PlayerAction = "idle" | "walk" | "attack" | "defend" | "dash" | "hit" | "ko"
+export type PlayerAction = "idle" | "walk" | "attack" | "defend" | "dash" | "hit" | "stunned" | "ko"
 
-export type EffectType = "spark" | "shield"
+export type EffectType = "spark" | "shield" | "stun"
 
 export type Effect = {
   id: string

@@ -41,7 +41,7 @@ function attackHitbox(p: Player): Rect {
 }
 
 function canAct(p: Player) {
-  return p.action !== "hit" && p.action !== "ko"
+  return p.action !== "hit" && p.action !== "stunned" && p.action !== "ko"
 }
 
 function setAction(p: Player, action: Player["action"]) {
@@ -86,6 +86,11 @@ function applyDamage(
     setAction(defender, "ko")
     state.phase = "ko"
     state.winner = attacker.id
+    return
+  }
+
+  if (defending) {
+    defender.vel = v(0, 0)
     return
   }
 
@@ -216,6 +221,8 @@ export function stepGame(state: GameState, dtRaw: number, input: Record<PlayerId
 
   if (p1.action === "hit" && p1.actionT >= CONFIG.attack.hitStun) setAction(p1, "idle")
   if (p2.action === "hit" && p2.actionT >= CONFIG.attack.hitStun) setAction(p2, "idle")
+  if (p1.action === "stunned" && p1.actionT >= CONFIG.defend.stunOnBlock) setAction(p1, "idle")
+  if (p2.action === "stunned" && p2.actionT >= CONFIG.defend.stunOnBlock) setAction(p2, "idle")
 
   if (p1.action === "dash" && p1.actionT >= CONFIG.dash.duration) setAction(p1, "idle")
   if (p2.action === "dash" && p2.actionT >= CONFIG.dash.duration) setAction(p2, "idle")
@@ -234,7 +241,7 @@ export function stepGame(state: GameState, dtRaw: number, input: Record<PlayerId
   if (p1.action === "dash") {
     const d = facingDir(p1.facing)
     p1.vel = v(d.x * CONFIG.dash.speed, d.y * CONFIG.dash.speed)
-  } else if (p1.action !== "attack" && p1.action !== "hit" && p1.action !== "ko") {
+  } else if (p1.action !== "attack" && p1.action !== "hit" && p1.action !== "stunned" && p1.action !== "ko") {
     p1.vel = v(i1.move.x * CONFIG.moveSpeed * moveMul1, i1.move.y * CONFIG.moveSpeed * moveMul1)
     setAction(p1, Math.abs(i1.move.x) + Math.abs(i1.move.y) > 0.1 ? "walk" : p1.action === "defend" ? "defend" : "idle")
   }
@@ -242,7 +249,7 @@ export function stepGame(state: GameState, dtRaw: number, input: Record<PlayerId
   if (p2.action === "dash") {
     const d = facingDir(p2.facing)
     p2.vel = v(d.x * CONFIG.dash.speed, d.y * CONFIG.dash.speed)
-  } else if (p2.action !== "attack" && p2.action !== "hit" && p2.action !== "ko") {
+  } else if (p2.action !== "attack" && p2.action !== "hit" && p2.action !== "stunned" && p2.action !== "ko") {
     p2.vel = v(i2.move.x * CONFIG.moveSpeed * moveMul2, i2.move.y * CONFIG.moveSpeed * moveMul2)
     setAction(p2, Math.abs(i2.move.x) + Math.abs(i2.move.y) > 0.1 ? "walk" : p2.action === "defend" ? "defend" : "idle")
   }
@@ -295,20 +302,30 @@ export function stepGame(state: GameState, dtRaw: number, input: Record<PlayerId
   if (p1Active && !p1.attackHasHit) {
     const hb = attackHitbox(p1)
     if (rectsIntersect(hb, hurtbox(p2))) {
+      const p2Blocked = p2.action === "defend" && p2.actionT >= 0.03
       p1.attackHasHit = true
       spawnEffect(state, "spark", v(hb.x + hb.w * 0.5, hb.y + hb.h * 0.5), 0.1)
-      if (p2.action === "defend") spawnEffect(state, "shield", { ...p2.pos }, 0.12)
+      if (p2Blocked) {
+        spawnEffect(state, "shield", { ...p2.pos }, 0.12)
+        spawnEffect(state, "stun", { ...p1.pos }, 0.5)
+      }
       applyDamage(state, p1, p2, CONFIG.attack.damage, CONFIG.attack.knockback, false)
+      if (p2Blocked && p2.hp > 0) setAction(p1, "stunned")
     }
   }
 
   if (p2Active && !p2.attackHasHit) {
     const hb = attackHitbox(p2)
     if (rectsIntersect(hb, hurtbox(p1))) {
+      const p1Blocked = p1.action === "defend" && p1.actionT >= 0.03
       p2.attackHasHit = true
       spawnEffect(state, "spark", v(hb.x + hb.w * 0.5, hb.y + hb.h * 0.5), 0.1)
-      if (p1.action === "defend") spawnEffect(state, "shield", { ...p1.pos }, 0.12)
+      if (p1Blocked) {
+        spawnEffect(state, "shield", { ...p1.pos }, 0.12)
+        spawnEffect(state, "stun", { ...p2.pos }, 0.5)
+      }
       applyDamage(state, p2, p1, CONFIG.attack.damage, CONFIG.attack.knockback, false)
+      if (p1Blocked && p1.hp > 0) setAction(p2, "stunned")
     }
   }
 }
@@ -323,4 +340,3 @@ export function getUiSnapshot(state: GameState): UiSnapshot {
     phase: state.phase,
   }
 }
-

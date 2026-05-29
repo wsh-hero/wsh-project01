@@ -18,6 +18,7 @@ export const CONFIG = {
   defend: {
     damageMul: 0.4,
     knockbackMul: 0.25,
+    stunOnBlock: 1,
   },
   dash: {
     damage: 12,

@@ -47,6 +47,19 @@ export function drawEffect(ctx: CanvasRenderingContext2D, fx: Effect) {
     ctx.rect(x0 - r, y0 - r, r * 2, r * 2)
     ctx.stroke()
     ctx.restore()
+    return
+  }
+
+  if (fx.type === "stun") {
+    ctx.save()
+    ctx.globalAlpha = 0.9 * a
+    ctx.fillStyle = PALETTE.neonPink
+    const baseY = Math.round(fx.pos.y - 18 - p * 4)
+    for (let i = 0; i < 3; i++) {
+      const x = Math.round(fx.pos.x - 6 + i * 6)
+      ctx.fillRect(x, baseY + (i % 2), 2, 2)
+      ctx.fillRect(x + 1, baseY - 1 + (i % 2), 1, 4)
+    }
+    ctx.restore()
   }
 }
-

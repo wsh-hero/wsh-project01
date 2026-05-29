@@ -30,6 +30,7 @@ export default function GameCanvas() {
     const state = createGame()
     stateRef.current = state
     rendererRef.current = createRenderer(ctx)
+    setSnapshot(getUiSnapshot(state))
 
     const onKeyDown = (e: KeyboardEvent) => {
       keys.down[e.code] = true
@@ -117,4 +118,3 @@ export default function GameCanvas() {
     </div>
   )
 }
-

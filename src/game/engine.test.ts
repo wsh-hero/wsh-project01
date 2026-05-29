@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { CONFIG } from "./config"
 import { createGame, stepGame } from "./engine"
 import type { InputFrame } from "./types"
 
@@ -49,6 +50,30 @@ it("defend should reduce damage", () => {
   expect(b.players.p2.hp).toBeGreaterThan(a.players.p2.hp)
 })
 
+it("attacker should be stunned for one second when attack is blocked", () => {
+  const state = createGame()
+  state.players.p1.pos = { x: 120, y: 90 }
+  state.players.p2.pos = { x: 135, y: 90 }
+  state.players.p1.facing = "right"
+
+  stepGame(state, 1 / 60, {
+    p1: { ...neutral, attackPressed: true, attackDown: true },
+    p2: { ...neutral, defendDown: true },
+  })
+  stepN(state, 8, { p1: { ...neutral, attackDown: true }, p2: { ...neutral, defendDown: true } })
+
+  expect(state.players.p1.action).toBe("stunned")
+
+  stepN(state, Math.floor(CONFIG.defend.stunOnBlock * 60) - 5, {
+    p1: neutral,
+    p2: { ...neutral, defendDown: true },
+  })
+  expect(state.players.p1.action).toBe("stunned")
+
+  stepN(state, 8, { p1: neutral, p2: neutral })
+  expect(state.players.p1.action).toBe("idle")
+})
+
 describe("ko", () => {
   it("should set winner and freeze phase", () => {
     const state = createGame()
@@ -64,4 +89,3 @@ describe("ko", () => {
     expect(state.winner).toBe("p1")
   })
 })
-
